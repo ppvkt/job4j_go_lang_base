@@ -45,4 +45,24 @@ func Test_Mono(t *testing.T) {
 
 		assert.Equal(t, false, rsl)
 	})
+
+	t.Run("[] - true", func(t *testing.T) {
+		t.Parallel()
+		in := []int{}
+
+		rsl := base.Mono(in)
+
+		assert.Equal(t, true, rsl)
+
+	})
+
+	t.Run("[11] - true", func(t *testing.T) {
+		t.Parallel()
+		in := []int{}
+
+		rsl := base.Mono(in)
+
+		assert.Equal(t, true, rsl)
+
+	})
 }
