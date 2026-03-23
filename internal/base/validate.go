@@ -1,5 +1,13 @@
 package base
 
+const (
+	ReqValidateMessage        = "req is nil"
+	UserIdValidateMessage     = "UserId is empty"
+	DescriptionValidateMessag = "Desс is empty"
+	TitleValidateMessage      = "Title is empty"
+	emptyField                = ""
+)
+
 type ValidateRequest struct {
 	UserId      string
 	Title       string
@@ -27,11 +35,3 @@ func Validate(req *ValidateRequest) []string {
 
 	return res
 }
-
-const (
-	ReqValidateMessage        = "req is nil"
-	UserIdValidateMessage     = "UserId is empty"
-	DescriptionValidateMessag = "Desс is empty"
-	TitleValidateMessage      = "Title is empty"
-	emptyField                = ""
-)

@@ -40,6 +40,11 @@ lint:
 	fi
 	golangci-lint run
 
+# Запуск линтера и тестов перед пушем
+.PHONY: push
+push: lint test
+	git push
+
 # Запуск всех проверок
 .PHONY: all
 all: lint test coverage
