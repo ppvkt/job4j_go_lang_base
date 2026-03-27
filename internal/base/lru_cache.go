@@ -15,7 +15,7 @@ type LruCache struct {
 
 func NewLruCache(size int) *LruCache {
 	if size < 0 {
-		size = 0
+		panic("cache size cannot be negative")
 	}
 
 	return &LruCache{
@@ -27,32 +27,16 @@ func (l *LruCache) GetSize() int {
 	return l.size
 }
 
-func (l *LruCache) SetSize(cacheSize int) {
-	if cacheSize < 0 {
-		cacheSize = 0
-	}
-
-	currentSize := l.Len()
-
-	if cacheSize < currentSize {
-		for l.Len() > cacheSize {
-			l.removeTail()
-		}
-	}
-
-	l.size = cacheSize
-}
-
-func (l *LruCache) Put(key string, value string) {
+func (l *LruCache) Put(key string, value string) bool {
 	if l.size <= 0 {
-		return
+		return false
 	}
 
 	node := l.find(key)
 	if node != nil {
 		node.Value = value
 		l.moveToHead(node)
-		return
+		return true
 	}
 
 	newNode := &Node{Key: key, Value: value}
@@ -62,6 +46,7 @@ func (l *LruCache) Put(key string, value string) {
 	}
 
 	l.insertHead(newNode)
+	return true
 }
 
 func (l *LruCache) Get(key string) *string {
