@@ -64,16 +64,14 @@ func (u UpdateUsecase) Done(in Input, out Output, tracker *Tracker) {
 	out.Out("enter new name for this uuid: ")
 	newName := in.Get()
 
-	res := tracker.UpdateItem(uuid, newName)
+	ok := tracker.UpdateItem(uuid, newName)
 
-	if res {
-		out.Out("success update")
-	}
-
-	if !res {
+	if !ok {
 		out.Out("unsuccess update")
+		return
 	}
 
+	out.Out("success update")
 }
 
 type DeleteUsecase struct{}
@@ -82,14 +80,14 @@ func (u DeleteUsecase) Done(in Input, out Output, tracker *Tracker) {
 	out.Out("enter uuid with you want delete: ")
 	uuid := in.Get()
 
-	res := tracker.DeleteItem(uuid)
-	if res {
-		out.Out("success delete")
+	ok := tracker.DeleteItem(uuid)
+
+	if !ok {
+		out.Out("unsuccess delete")
+		return
 	}
 
-	if !res {
-		out.Out("unsuccess delete")
-	}
+	out.Out("success delete")
 }
 
 type FindUsecase struct{}
