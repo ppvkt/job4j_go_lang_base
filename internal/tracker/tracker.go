@@ -1,13 +1,19 @@
 package tracker
 
-import "strings"
+import (
+	"strings"
+)
 
 type ItemCrud interface {
-	AddItem(item Item)
+	AddItem(item Item) (Item, error)
 	GetItems() []Item
-	UpdateItem(uuid string, newName string) bool
-	DeleteItem(uuid string) bool
+	UpdateItem(uuid string, newName string) error
+	DeleteItem(uuid string) error
 	FindItem(namePart string) []Item
+}
+
+type error interface {
+	Error() string
 }
 
 type Tracker struct {
@@ -23,8 +29,16 @@ func NewTracker() *Tracker {
 	return &Tracker{}
 }
 
-func (t *Tracker) AddItem(item Item) {
+func (t *Tracker) AddItem(item Item) (Item, error) {
+	_, ok := t.indexOf(item.ID)
+	if ok {
+		return item, ErrHasAlreadyExist
+	}
+
 	t.Items = append(t.Items, item)
+
+	return item, nil
+
 }
 
 func (t *Tracker) GetItems() []Item {
@@ -33,25 +47,29 @@ func (t *Tracker) GetItems() []Item {
 	return res
 }
 
-func (t *Tracker) UpdateItem(uuid string, newName string) bool {
-	for index, item := range t.Items {
-		if uuid == item.ID {
-			t.Items[index].Name = newName
-			return true
-		}
+func (t *Tracker) UpdateItem(uuid string, newName string) error {
+	index, ok := t.indexOf(uuid)
+
+	if !ok {
+		return ErrNotFound
 	}
-	return false
+
+	t.Items[index].Name = newName
+
+	return nil
 }
 
-func (t *Tracker) DeleteItem(uuid string) bool {
-	for index, item := range t.Items {
-		if uuid == item.ID {
-			copy(t.Items[index:], t.Items[index+1:])
-			t.Items = t.Items[:len(t.Items)-1]
-			return true
-		}
+func (t *Tracker) DeleteItem(uuid string) error {
+	index, ok := t.indexOf(uuid)
+
+	if !ok {
+		return ErrNotFound
 	}
-	return false
+
+	copy(t.Items[index:], t.Items[index+1:])
+	t.Items = t.Items[:len(t.Items)-1]
+
+	return nil
 }
 
 func (t *Tracker) FindItem(namePart string) []Item {
@@ -65,4 +83,13 @@ func (t *Tracker) FindItem(namePart string) []Item {
 	}
 
 	return result
+}
+
+func (t *Tracker) indexOf(id string) (int, bool) {
+	for i, item := range t.Items {
+		if item.ID == id {
+			return i, true
+		}
+	}
+	return -1, false
 }

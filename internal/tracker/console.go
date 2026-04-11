@@ -35,75 +35,87 @@ func (i Item) toString() string {
 }
 
 type Usecase interface {
-	Done(in Input, out Output, tracker *Tracker)
+	Done(in Input, out Output, tracker *Tracker) error
 }
 
 type AddUsecase struct{}
 
-func (u AddUsecase) Done(in Input, out Output, tracker *Tracker) {
+func (u AddUsecase) Done(in Input, out Output, tracker *Tracker) error {
 	out.Out("enter name: ")
 	name := in.Get()
 	id := uuid.New().String()
-	tracker.AddItem(Item{Name: name, ID: id})
+	item, err := tracker.AddItem(Item{Name: name, ID: id})
+	if err != nil {
+		out.Out("failed to add item")
+		return fmt.Errorf("failed to add item, %w", err)
+	}
+	out.Out("item added: " + item.toString())
+	return nil
 }
 
 type GetUsecase struct{}
 
-func (u GetUsecase) Done(_ Input, out Output, tracker *Tracker) {
+func (u GetUsecase) Done(_ Input, out Output, tracker *Tracker) error {
 	for _, item := range tracker.Items {
 		out.Out(item.toString())
 	}
+
+	return nil
 }
 
 type UpdateUsecase struct{}
 
-func (u UpdateUsecase) Done(in Input, out Output, tracker *Tracker) {
+func (u UpdateUsecase) Done(in Input, out Output, tracker *Tracker) error {
 	out.Out("enter target uuid: ")
 	uuid := in.Get()
 
 	out.Out("enter new name for this uuid: ")
 	newName := in.Get()
 
-	ok := tracker.UpdateItem(uuid, newName)
+	err := tracker.UpdateItem(uuid, newName)
 
-	if !ok {
+	if err != nil {
 		out.Out("unsuccess update")
-		return
+		return fmt.Errorf("failed to upd item, %w", err)
 	}
 
 	out.Out("success update")
+	return nil
 }
 
 type DeleteUsecase struct{}
 
-func (u DeleteUsecase) Done(in Input, out Output, tracker *Tracker) {
+func (u DeleteUsecase) Done(in Input, out Output, tracker *Tracker) error {
 	out.Out("enter uuid with you want delete: ")
 	uuid := in.Get()
 
-	ok := tracker.DeleteItem(uuid)
+	err := tracker.DeleteItem(uuid)
 
-	if !ok {
+	if err != nil {
 		out.Out("unsuccess delete")
-		return
+		return fmt.Errorf("failed to delete item, %w", err)
 	}
 
 	out.Out("success delete")
+	return nil
 }
 
 type FindUsecase struct{}
 
-func (u FindUsecase) Done(in Input, out Output, tracker *Tracker) {
+func (u FindUsecase) Done(in Input, out Output, tracker *Tracker) error {
 	out.Out("enter part of name witch you want find: ")
 	part := in.Get()
 
 	res := tracker.FindItem(part)
 	if len(res) == 0 {
 		out.Out("no results")
-		return
+		return nil
 	}
 	for _, item := range res {
 		out.Out(item.toString())
 	}
+
+	return nil
 }
 
 type UI struct {
@@ -133,6 +145,9 @@ func (u UI) Run() {
 			u.Out.Out("not found action")
 			continue
 		}
-		action.Done(u.In, u.Out, u.Tracker)
+		err := action.Done(u.In, u.Out, u.Tracker)
+		if err != nil {
+			continue
+		}
 	}
 }
