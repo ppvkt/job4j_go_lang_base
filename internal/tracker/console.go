@@ -49,7 +49,9 @@ func (u AddUsecase) Done(in Input, out Output, tracker *Tracker) error {
 		out.Out("failed to add item")
 		return fmt.Errorf("failed to add item, %w", err)
 	}
-	out.Out("item added: " + item.toString())
+	msg := fmt.Sprintf("item added: %s", item.toString())
+	out.Out(msg)
+
 	return nil
 }
 
