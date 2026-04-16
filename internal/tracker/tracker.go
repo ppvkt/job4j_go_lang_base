@@ -12,17 +12,8 @@ type ItemCrud interface {
 	FindItem(namePart string) []Item
 }
 
-type error interface {
-	Error() string
-}
-
 type Tracker struct {
 	Items []Item
-}
-
-type Item struct {
-	ID   string
-	Name string
 }
 
 func NewTracker() *Tracker {
